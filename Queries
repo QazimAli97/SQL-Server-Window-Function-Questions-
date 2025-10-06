@@ -1,0 +1,174 @@
+select * from [Sales (1)]
+select * from [Customer (1)]
+select * from [Product (1)]
+
+--1)
+select Order_ID,Order_Date,Sales,ROW_NUMBER() over(order by order_date) [Row number]
+from [Sales (1)]
+
+--2)
+select top 5 c.Customer_ID,Customer_Name,Order_ID,Order_Date,
+ROW_NUMBER() over(order by order_date desc) [Row Number]
+from [Sales (1)] s
+inner join [Customer (1)] c
+on s.Customer_ID = c.Customer_ID
+
+--3)
+select Product_Name,Category,
+sum(sales) [Total Sales Amount],
+ROW_NUMBER() over (partition by category order by sum(sales) desc)[Row Number]
+from [Product (1)] p
+inner join [Sales (1)] s
+on p.Product_ID = s.Product_ID
+group by Product_Name,Category
+
+-- 4)
+
+select c.Customer_ID,Customer_Name,sum(sales)[Purchase Value],Region,
+ROW_NUMBER() over(partition by Region order by sum(sales) desc)[Row Number]
+from [Customer (1)] c
+inner join [Sales (1)] s
+on c.customer_id = s.customer_id
+group by c.Customer_ID,Customer_Name,Region
+	
+--5)
+select * from (
+select c.Customer_ID,Customer_Name,Order_Date,
+ROW_NUMBER() over (partition by s.Customer_ID  order by order_date)[Row Number]
+from [Customer (1)] c
+inner join [Sales (1)] s
+on c.Customer_ID = s.Customer_ID) as sub
+where [Row Number]  = '1'
+
+
+--6)
+select * from
+(select Customer_ID,Order_ID,Sales[Transaction],
+ROW_NUMBER() over(order by sales desc) [Row Number]
+from [Sales (1)]) as sub
+where [Row Number] between 51 and 100
+
+--7)
+
+
+--select *,
+--ROW_NUMBER() over(order by hiredate) [Row Number]
+--from employees 
+--where HireDate is not null
+
+--8)
+select * from [Sales (1)]
+select * from [Customer (1)]
+select * from [Product (1)]
+
+select p.Product_ID,Product_Name,category,
+sum(quantity) [Total Quantity Sold],
+RANK() over(partition by category order by sum(quantity) desc)[Rank]
+from [Sales (1)] s
+inner join [Product (1)] p
+on s.Product_ID = p.Product_ID
+group by Product_Name,p.Product_ID,Category
+
+--9)
+
+select s.Customer_ID,Customer_Name,
+sum(sales) [Total Purchase Amount],Region,
+Rank() over(partition by region order by sum(sales) desc)[Rank]
+from [Sales (1)] s
+inner join [Customer (1)] c
+on s.customer_id = c.Customer_ID
+group by s.Customer_ID,Customer_Name,Region
+
+
+
+--10) Rank sales representatives based on their monthly sales performance.
+
+--Not have sales representatives data
+
+--11) 
+ 
+select * from (select Product_name,Profit[Total Profit],Category,
+RANK() over (partition by category order by profit desc)[Top 3 Products by Profit]
+from [Product (1)] p
+inner join [Sales (1)] s
+on p.Product_ID = s.Product_ID) as sub
+where [Top 3 Products by Profit] between 1 and 3
+
+--12. Rank stores based on total revenue — note how ties affect the ranking sequence.
+
+-- not have
+
+--13)
+
+select * from (select Product_Name,Sales,datename(month,order_Date)as Month_name,
+RANK() over (partition by datename(month,order_Date) order by sales desc ) [Top Performing Product]
+from [Sales (1)] s
+inner join [Product (1)] p
+on s.Product_ID = p.Product_ID ) as sub
+where [Top Performing Product] = '1'
+
+--14)
+
+select c.Customer_ID,Customer_Name,count(Order_ID)[Quantity Placed],
+RANK() over (order by count(Order_ID) desc)[Customer Rank]
+from [Customer (1)] c
+inner join [Sales (1)] s
+on c.Customer_ID = s.Customer_ID
+where year(Order_Date) = '2017'
+group by  c.Customer_ID,Customer_Name
+
+
+
+--15)
+select Category,Product_Name
+,sum(sales) [Total Sales],
+DENSE_RANK() over(partition by category order by sum(sales) desc )[Sales Rank]
+from [Sales (1)] s
+inner join [Product (1)] p
+on s.Product_ID = p.Product_ID
+group by Product_Name,Category
+
+
+--16) not able to solve
+
+--17)
+select * from (select  Product_Name,Category,sum(sales)[Total Revenue],
+DENSE_RANK() over(partition by category order by sum(sales) desc)[Top 3 Products by Revenue]
+from [Sales (1)]s
+inner join [Product (1)]p
+on s.Product_ID = p.Product_ID
+group by Product_Name,Category) as sub
+where [Top 3 Products by Revenue] between 1 and 3
+
+--18) not have enough data of sales repre-In each region, assign a dense rank to sales reps based on their sales target
+--achievement.
+
+--rank customers within each region based on total sales
+select s.Customer_ID,Customer_Name,Region,SUM(sales)[Total Sales],
+DENSE_RANK() over (partition by region order by sum(sales) desc)[Sales rank]
+from [Sales (1)]s 
+inner join [Customer (1)]c
+on s.Customer_ID = c.Customer_ID
+group by s.Customer_ID,Customer_Name,Region
+
+--19)
+
+
+select * from (select Region,MONTH(Order_Date)[Month],SUM(Profit)[Total Profits],
+DENSE_RANK() over(partition by region order by SUM(Profit) desc)[Profit Rank]
+from [Sales (1)]s
+inner join [Customer (1)]c
+on s.Customer_ID = c.Customer_ID
+group by Region,MONTH(Order_Date)) as sub
+where [Profit Rank] <= 2
+
+
+select * from [Sales (1)]
+select * from [Customer (1)]
+select * from [Product (1)]
+
+
+
+
+
+
