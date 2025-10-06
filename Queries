@@ -167,6 +167,17 @@ select * from [Sales (1)]
 select * from [Customer (1)]
 select * from [Product (1)]
 
+--20)
+
+
+select * from (select p.Sub_Category,
+(sum(profit)/sum(sales)*100)[Profit Margin],
+DENSE_RANK()over(order by (sum(profit)/sum(sales)*100)desc )[Top 5]
+from [Sales (1)]s
+inner join [Product (1)]p
+on s.Product_ID = p.Product_ID
+group by p.Sub_Category)as sub
+where [Top 5] <= 5
 
 
 
